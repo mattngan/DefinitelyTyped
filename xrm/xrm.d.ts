@@ -1,6 +1,6 @@
-﻿// Type definitions for Microsoft Dynamics xRM API v6.1.1
-// Project: http://msdn.microsoft.com/en-us/library/gg328255.aspx
-// Definitions by: David Berry <https://github.com/6ix4our/>
+﻿// Type definitions for Microsoft Dynamics xRM API v7.0.a
+// Project: http://www.microsoft.com/en-us/download/details.aspx?id=44567
+// Definitions by: David Berry <https://github.com/6ix4our/>, Matt Ngan <https://github.com/mattngan/>
 // Definitions: https://github.com/borisyankov/DefinitelyTyped
 
 declare module Xrm 
@@ -1006,6 +1006,203 @@ declare module Xrm
         }
 
         /**
+         * Interface for the form's business process, Xrm.Page.data.process
+         */
+        export interface process
+        {
+            /**
+             * Returns a Process object representing the active process.
+             *
+             * @return current active process
+             */
+            getActiveProcess(): Process;
+
+            /**
+             * Set a Process as the active process.
+             *
+             * @param   {string}   processId, the Id of the process to make the active process
+             * @param   {function}   callbackFunction, a function to call when the operation is complete.
+             */
+            setActiveProcess(processId: string, callbackFunction: () => void): void;
+
+            /**
+             * Returns a Stage object representing the active stage
+             *
+             * @return current active stage
+             */
+            getActiveStage(): Stage;
+
+            /**
+             * Set a stage as the active stage. 
+             *
+             * @param   {string}   stageId, the Id of the stage to make the active stage.
+             * @param   {function}   callbackFunction, a function to call when the operation is complete.
+             */
+            setActiveStage(stageId: string, callbackFunction: () => void): void;
+
+            /**
+             * Use this method to get a collection of stages currently in the active path with methods to interact with the stages displayed in the business process flow control.
+             * The active path represents stages currently rendered in the process control based on the branching rules and current data in the record.
+             *
+             * @return A collection of all completed stages, the currently active stage, and the predicted set of future stages based on satisfied conditions in the branching rule. This may be a subset of the stages returned with 
+             *     Xrm.Page.data.process.getActiveProcess because it will only include those stages which represent a valid transition from the current stage based on branching that has occurred in the process. 
+             */
+            getActivePath(): Collection.ItemCollection<Stage>;
+
+            /**
+             * Use this method to asynchronously retrieve the enabled business process flows that the user can switch to for an entity.
+             *
+             * @param   {function}   callbackFunction. The callback function must accept a parameter that contains an object with dictionary properties where the name of the property is the Id of the business process flow
+             *     and the value of the property is the name of the business process flow.
+             *
+             *     The enabled processes are filtered according to the user’s privileges. The list of enabled processes is the same ones a user can see in the UI if they want to change the process manually.
+             */
+            getEnabledProcesses(callbackFunction: (enabledProcesses: Collection.ItemCollection<Process>) => void): void;
+
+            /**
+             * Use this to add a function as an event handler for the OnStageChange event so that it will be called when the business process flow stage changes.
+             *
+             * @param   {function}   callbackFunction.  The function will be added to the bottom of the event handler pipeline. The execution context is automatically set to be the first parameter passed to the event handler. 
+             */
+            addOnStageChange(handler: ContextSensitiveHandler): void;
+
+            /**
+             * Use this to remove a function as an event handler for the OnStageChange event.
+             *
+             * @param   {function}   handler.  If an anonymous function is set using the addOnStageChange method it cannot be removed using this method.
+             */
+            removeOnStageSelected(handler: ContextSensitiveHandler): void;
+
+            /**
+             * Progresses to the next stage.
+             *
+             * @param   {function}   callbackFunction.  A function to call when the operation is complete.
+             */
+            moveNext(callbackFunction: () => void): void;
+
+            /**
+             * Moves to the previous stage.
+             *
+             * @param   {function}   callbackFunction.  A function to call when the operation is complete.
+             */
+            movePrevious(callbackFunction: () => void): void;
+        }
+
+        /**
+         * Interface a Process object.
+         */
+        export interface Process
+        {
+            /**
+             * Returns the unique identifier of the process.
+             *
+             * @return  Value represents the string representation of a GUID value.
+             */
+            getId(): string;
+
+            /**
+             * Returns the name of the process.
+             */
+            getName(): string;
+
+            /**
+             * Returns an collection of stages in the process.
+             */
+            getStages(): Collection.ItemCollection<Stage>;
+
+            /**
+             * Returns a boolean value to indicate if the process is rendered
+             *
+             * @return  true if the process is rendered, false if not
+             */
+            isRendered(): boolean;
+        }
+
+        /**
+         * Interface a Stage object.
+         */
+        export interface Stage
+        {
+            /**
+             * Returns an object with a getValue method which will return the integer value of the business process flow category. 
+             */
+            getCategory(): ProcessStage_Category;
+
+            /**
+             * Returns the logical name of the entity associated with the stage.
+             */
+            getEntityName(): string;
+
+            /**
+             * Returns the unique identifier of the stage
+             */
+            getId(): string;
+
+            /**
+             * Returns the name of the stage
+             */
+            getName(): string;
+
+            /**
+             * Returns the status of the stage
+             *
+             * @remarks  This method will return either "active" or "inactive".
+             */
+            getStatus(): string;
+
+            /**
+             * Returns a collection of steps in the stage
+             */
+            getSteps(): Collection.ItemCollection<Step>;
+        }
+
+        /**
+         * Interface a Process Stage Category Object.
+         */
+        export interface ProcessStage_Category
+        {
+            /**
+             * Gets Stage Category of a Process, as an integer.
+             *
+             * @return  The stage category.
+             * @remarks Values returned are: 0      Qualify
+             *                               1      Develop
+             *                               2      Propose
+             *                               3      Close
+             *                               4      Identify
+             *                               5      Research
+             *                               6      Resolve
+             */
+            getValue(): number;
+        }
+
+        /**
+         * Interface a Step object.
+         */
+        export interface Step
+        {
+            /**
+             * Returns the logical name of the attribute associated to the step.
+             *
+             * @remarks Some steps don’t contain an attribute value. 
+             */
+            getAttribute(): string;
+
+            /**
+             * Returns the name of the step.
+             */
+            getName(): string;
+
+            /**
+             * Returns whether the step is required in the business process flow.
+             * 
+             * @remarks Returns true if the step is marked as required in the Business Process Flow editor; otherwise, false. There is no connection between this value and the values you
+             *    can change in the Xrm.Page.data.entity attribute RequiredLevel methods.
+             */
+            isRequired(): boolean;
+        }
+
+        /**
          * Interface for the Xrm.Page.data API.
          */
         export interface Data
@@ -1014,6 +1211,11 @@ declare module Xrm
              * The record context of the form.
              */
             entity: Entity;
+
+            /**
+             * Provides events, methods, and objects to interact with the business process flow data in a form.
+             */
+            process: process;
 
             /**
              * Asynchronously refreshes data on the form, without reloading the page.
